@@ -51,13 +51,22 @@ async function trouver(id) {
 }
 
 async function parVisiteur(nom) {
-  const siens = (await lire()).filter((c) => c.nom === nom).sort((a, b) => b.cree_le.localeCompare(a.cree_le));
-  const resultat = [];
-  for (const c of siens) {
-    const article = await articles.trouver(c.article_id);
-    resultat.push({ id: c.id, article_id: c.article_id, titre: article.titre, texte: c.texte, cree_le: c.cree_le });
-  }
-  return resultat;
+  //const siens = (await lire()).filter((c) => c.nom === nom).sort((a, b) => b.cree_le.localeCompare(a.cree_le));
+  //const resultat = [];
+  //for (const c of siens) {
+  //  const article = await articles.trouver(c.article_id);
+  //  resultat.push({ id: c.id, article_id: c.article_id, titre: article.titre, texte: c.texte, cree_le: c.cree_le });
+  //}
+  //return resultat;
+
+  const resultat = await pool.query(
+    `SELECT commentaires.id, commentaires.article_id, commentaires.texte, commentaires.cree_le, articles.titre
+    FROM commentaires
+    JOIN articles ON articles.id = commentaires.article_id
+    WHERE commentaires.nom = $1
+    ORDER BY commentaires.cree_le DESC`,[nom]
+  );
+  return resultat.rows;
 }
 
 async function creer(articleId, { nom, texte }) {

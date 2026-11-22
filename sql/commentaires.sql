@@ -15,8 +15,17 @@ DROP TABLE IF EXISTS commentaires;
 --   cree_le     la date et l'heure du commentaire ; par defaut, maintenant
 -- Et une regle : quand un article est supprime, ses commentaires disparaissent avec lui.
 
+--https://neon.com/postgresql/tutorial/delete-cascade
+CREATE TABLE commentaires (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    article_id INT NOT NULL,
+    nom TEXT NOT NULL,
+    texte TEXT NOT NULL,
+    cree_le TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-
+    CONSTRAINT texte_pas_vide CHECK (texte <> ''),
+    FOREIGN KEY (article_id) REFERENCES article(id) ON DELETE CASCADE
+);
 
 -- QUESTION 2 · Inserer les huit commentaires de data/commentaires.initial.json.
 -- Ne donnez PAS les id : la base les attribue. Les dates sont en UTC (le Z final).

@@ -17,7 +17,10 @@ LEFT JOIN commentaires ON commentaires.article_id = articles.id
 GROUP BY articles.id, articles.titre;
 
 -- R3. Les articles qui n'ont aucun commentaire : id, titre.
-
+SELECT articles.id, articles.titre
+FROM articles
+LEFT JOIN commentaires ON commentaires.article_id = articles.id
+HAVING COUNT(commentaires.id) = 0;
 
 -- R4. Pour chaque auteur, le nombre total de commentaires recus sur ses articles,
 --     du plus commente au moins commente.

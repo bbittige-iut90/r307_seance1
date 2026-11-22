@@ -89,10 +89,16 @@ async function modifier(id, { texte }) {
 }
 
 async function supprimer(id) {
-  const tous = await lire();
-  const restants = tous.filter((c) => c.id !== id);
-  if (restants.length === tous.length) throw introuvable(id);
-  await ecrire(restants);
+  //const tous = await lire();
+  //const restants = tous.filter((c) => c.id !== id);
+  //if (restants.length === tous.length) throw introuvable(id);
+  //await ecrire(restants);
+
+  if (!Number.isInteger(id)) throw introuvable(id);
+  const resultat = await pool.query(
+    `DELETE FROM commentaires WHERE id = $1`,[id]
+  );
+  if (resultat.rowCount === 0) throw introuvable(id);
 }
 
 module.exports = { lister, trouver, parVisiteur, creer, modifier, supprimer };

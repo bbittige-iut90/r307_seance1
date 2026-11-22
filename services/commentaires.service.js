@@ -70,13 +70,28 @@ async function parVisiteur(nom) {
 }
 
 async function creer(articleId, { nom, texte }) {
-  await articles.trouver(articleId);
-  const tous = await lire();
-  const id = tous.length === 0 ? 1 : Math.max(...tous.map((c) => c.id)) + 1;
-  const commentaire = { id, article_id: articleId, nom, texte, cree_le: new Date().toISOString() };
-  tous.push(commentaire);
-  await ecrire(tous);
-  return commentaire;
+  //await articles.trouver(articleId);
+  //const tous = await lire();
+  //const id = tous.length === 0 ? 1 : Math.max(...tous.map((c) => c.id)) + 1;
+  //const commentaire = { id, article_id: articleId, nom, texte, cree_le: new Date().toISOString() };
+  //tous.push(commentaire);
+  //await ecrire(tous);
+  //return commentaire;
+
+  if (!Number.isInteger(articleId)) throw articleIntrouvable(articleId);
+  try {
+    const resultat = await pool.query(
+      `INSERT INTO commentaires (article_id, nom, texte)
+      VALUES ($1, $2, $3)
+      RETURNING id, article_id, nom, texte, cree_le`,[articleId,nom,texte]
+    );
+    if (resultat.rowCount === 0) {
+      throw new ErreurHttp(400, 'AUTEUR_INCONNU', `Aucun auteur ne s'appelle ${donnees.auteur}.`);
+    }
+    return resultat.rows[0];
+  } catch (err) {
+    throw traduire(err);
+  }
 }
 
 // https://docs.postgresql.fr/12/dml-returning.html

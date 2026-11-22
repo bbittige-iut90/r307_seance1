@@ -11,7 +11,10 @@ ORDER BY cree_le DESC;
 
 -- R2. Le nombre de commentaires de CHAQUE article, y compris ceux qui n'en ont aucun :
 --     id, titre, nb_commentaires.
-
+SELECT articles.id, articles.titre, COUNT(commentaires.id) AS nb_commentaires
+FROM articles
+LEFT JOIN commentaires ON commentaires.article_id = articles.id
+GROUP BY articles.id, articles.titre;
 
 -- R3. Les articles qui n'ont aucun commentaire : id, titre.
 

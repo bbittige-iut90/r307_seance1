@@ -79,13 +79,26 @@ async function creer(articleId, { nom, texte }) {
   return commentaire;
 }
 
+// https://docs.postgresql.fr/12/dml-returning.html
 async function modifier(id, { texte }) {
-  const tous = await lire();
-  const commentaire = tous.find((c) => c.id === id);
-  if (!commentaire) throw introuvable(id);
-  commentaire.texte = texte;
-  await ecrire(tous);
-  return commentaire;
+  //const tous = await lire();
+  //const commentaire = tous.find((c) => c.id === id);
+  //if (!commentaire) throw introuvable(id);
+  //commentaire.texte = texte;
+  //await ecrire(tous);
+  //return commentaire;
+  
+  if (!Number.isInteger(id)) throw introuvable(id);
+  try {
+    const resultat = await pool.query(
+    `UPDATE commentaires
+    SET texte = $1
+    WHERE id = $2
+    RETURNING id, article_id, nom, texte, cree_le`,[texte,id]
+    );
+  } catch (err) {
+    throw traduire(err)
+  }
 }
 
 async function supprimer(id) {

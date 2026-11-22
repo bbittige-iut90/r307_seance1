@@ -24,7 +24,7 @@ CREATE TABLE commentaires (
     cree_le TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT texte_pas_vide CHECK (texte <> ''),
-    FOREIGN KEY (article_id) REFERENCES article(id) ON DELETE CASCADE
+    FOREIGN KEY (article_id) REFERENCES articles(id) ON DELETE CASCADE
 );
 
 -- QUESTION 2 · Inserer les huit commentaires de data/commentaires.initial.json.

@@ -20,7 +20,7 @@ async function lister(articleId) {
   //const tous = await lire();
   //return tous.filter((c) => c.article_id === articleId).sort((a, b) => a.cree_le.localeCompare(b.cree_le));
   
-  if (!Number.isInteger(id)) throw articleIntrouvable(id);
+  if (!Number.isInteger(articleId)) throw articleIntrouvable(articleId);
   //JOIN articles ON articles.id = commentaires.article_id
   const article = await pool.query(
     `SELECT id FROM articles WHERE id = $1`,[articleId]
@@ -85,11 +85,9 @@ async function creer(articleId, { nom, texte }) {
       VALUES ($1, $2, $3)
       RETURNING id, article_id, nom, texte, cree_le`,[articleId,nom,texte]
     );
-    if (resultat.rowCount === 0) {
-      throw new ErreurHttp(400, 'AUTEUR_INCONNU', `Aucun auteur ne s'appelle ${donnees.auteur}.`);
-    }
     return resultat.rows[0];
   } catch (err) {
+    if (err.code === '23503') throw articleIntrouvable(articleId);
     throw traduire(err);
   }
 }
@@ -111,6 +109,8 @@ async function modifier(id, { texte }) {
     WHERE id = $2
     RETURNING id, article_id, nom, texte, cree_le`,[texte,id]
     );
+    if (resultat.rowCount === 0) throw introuvable(id);
+    return resultat.rows[0];
   } catch (err) {
     throw traduire(err)
   }

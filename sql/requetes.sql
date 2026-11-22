@@ -24,6 +24,12 @@ HAVING COUNT(commentaires.id) = 0;
 
 -- R4. Pour chaque auteur, le nombre total de commentaires recus sur ses articles,
 --     du plus commente au moins commente.
+SELECT auteurs.id, auteurs.nom, COUNT(commentaires.id) AS nb_total_commentaires_sur_articles
+FROM auteurs
+JOIN articles ON articles.auteur_id = auteurs.id
+JOIN commentaires ON commentaires.article_id = articles.id
+GROUP BY auteurs.id, auteurs.nom
+ORDER BY nb_total_commentaires_sur_articles DESC;
 
 
 -- R5. Les visiteurs (nom) qui ont commente plus d'un article.

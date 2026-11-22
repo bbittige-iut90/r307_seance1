@@ -2,21 +2,34 @@
 // Elle respecte le contrat (CONTRAT.md) : le cote API peut s'en servir tout de suite pour tester
 // ses routes. Le cote base la remplace par une version PostgreSQL, avec les MEMES fonctions.
 // Les articles, eux, sont deja dans PostgreSQL (services/articles.service.js).
-
-const fs = require('fs/promises');
-const path = require('path');
+const pool = require('../db/pool');
 const ErreurHttp = require('../utils/erreur-http');
-const articles = require('./articles.service');
 
-const FICHIER = path.join(__dirname, '..', 'data', 'commentaires.json');
-const lire = async () => JSON.parse(await fs.readFile(FICHIER, 'utf8'));
-const ecrire = (liste) => fs.writeFile(FICHIER, JSON.stringify(liste, null, 2));
 const introuvable = (id) => new ErreurHttp(404, 'COMMENTAIRE_INTROUVABLE', `Le commentaire ${id} n'existe pas.`);
+const articleIntrouvable = (id) => new ErreurHttp(404, 'ARTICLE_INTROUVABLE', `L'article ${id} n'existe pas.`);
+
+function traduire(err) {
+  if (err.code === '23514' || err.code === '23502') return new ErreurHttp(400, 'VALEUR_REFUSEE', `Valeur refusée par la base (${err.constraint}).`);
+  if (err.code === '22P02') return new ErreurHttp(400, 'TYPE_INVALIDE', 'Une valeur n’a pas le bon type.');
+  return err;
+}
+
 
 async function lister(articleId) {
-  await articles.trouver(articleId); // 404 si l'article n'existe pas
-  const tous = await lire();
-  return tous.filter((c) => c.article_id === articleId).sort((a, b) => a.cree_le.localeCompare(b.cree_le));
+  //await articles.trouver(articleId); // 404 si l'article n'existe pas
+  //const tous = await lire();
+  //return tous.filter((c) => c.article_id === articleId).sort((a, b) => a.cree_le.localeCompare(b.cree_le));
+  
+  if (!Number.isInteger(id)) throw articleIntrouvable(id);
+  //JOIN articles ON articles.id = commentaires.article_id
+  const article = await pool.query(
+    `SELECT id FROM articles WHERE id = $1`,[articleId]
+  );
+  if (article.rowCount === 0) throw articleIntrouvable(articleId);
+  const resultat = await pool.query(
+    'SELECT id, article_id, nom, texte, cree_le FROM commentaires WHERE article_id = $1 ORDER BY cree_le ASC', [articleId]
+  );
+  return resultat.rows;
 }
 
 async function trouver(id) {

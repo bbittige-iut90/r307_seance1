@@ -27,15 +27,27 @@ async function lister(articleId) {
   );
   if (article.rowCount === 0) throw articleIntrouvable(articleId);
   const resultat = await pool.query(
-    'SELECT id, article_id, nom, texte, cree_le FROM commentaires WHERE article_id = $1 ORDER BY cree_le ASC', [articleId]
+    `SELECT id, article_id, nom, texte, cree_le 
+    FROM commentaires 
+    WHERE article_id = $1 
+    ORDER BY cree_le ASC`, [articleId]
   );
   return resultat.rows;
 }
 
 async function trouver(id) {
-  const commentaire = (await lire()).find((c) => c.id === id);
-  if (!commentaire) throw introuvable(id);
-  return commentaire;
+  //const commentaire = (await lire()).find((c) => c.id === id);
+  //if (!commentaire) throw introuvable(id);
+  //return commentaire;
+
+  if (!Number.isInteger(id)) throw introuvable(id);
+  const resultat = await pool.query(
+    `SELECT id, article_id, nom, texte, cree_le
+    FROM commentaires
+    WHERE id = $1`,[id]
+  );
+  if (resultat.rowCount === 0) throw introuvable(id);
+  return resultat.rows[0];
 }
 
 async function parVisiteur(nom) {

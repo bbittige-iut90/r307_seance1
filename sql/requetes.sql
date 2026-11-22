@@ -33,7 +33,9 @@ ORDER BY nb_total_commentaires_sur_articles DESC;
 
 
 -- R5. Les visiteurs (nom) qui ont commente plus d'un article.
-
+SELECT nom
+FROM commentaires
+GROUP BY nom
+HAVING COUNT(DISTINCT article_id) > 1;
 
 -- R6. Les trois commentaires les plus recents, avec le titre de leur article.
-
